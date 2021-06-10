@@ -32,6 +32,8 @@
 #define NOTEOFF1 (uint8_t)NOTENUM
 #define NOTEOFF2 (uint8_t)0
 
+#define ALLSOUNDOFFVALUE 120
+
 uint8_t GP1bitHistory;
 uint8_t GP3bitHistory;
 uint8_t TMR0roundUpper;

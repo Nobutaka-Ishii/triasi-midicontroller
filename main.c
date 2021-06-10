@@ -3,7 +3,7 @@
 // CONFIG
 #pragma config IOSCFS = 8MHZ    // Internal Oscillator Frequency Select bit (8 MHz)
 #pragma config MCPU = OFF       // Master Clear Pull-up Enable bit (Pull-up disabled)
-#pragma config WDTE = ON       // Watchdog Timer Enable bit (WDT disabled)
+#pragma config WDTE = ON       // Watchdog Timer Enable bit (WDT enabled)
 #pragma config CP = OFF         // Code protection bit (Code protection off)
 #pragma config MCLRE = OFF      // GP3/MCLR Pin Function Select bit (GP3/MCLR pin function is digital I/O, MCLR internally tied to VDD)
 
@@ -98,6 +98,11 @@ void main(void) {
 	send1byte(NOTEOFF1);
 	send1byte(NOTEOFF2);
 	*/
+	
+	// send all-sound-off to NOTE-control pedal channel
+	send1byte(0xB0|NOTECHANNEL);
+	send1byte(ALLSOUNDOFFVALUE);
+	send1byte(0x0);
 
 	head = 0;
 	tail = 0;
@@ -111,15 +116,6 @@ void main(void) {
 	while(1){
 				
 		if( tail == head ){
-#if 0		
-			uint8_t gpioReg = 0;
-			gpioReg = GPIO;
-			if( GPIObits.GP1 == 1){
-				send1byte(0xfc);
-			}else{
-				send1byte(0xfe);
-			}
-#else
 			collectGpioStat();
 			
 			REMOVECHATTERINGANDFIXCURRENTPEDALSTATUS
@@ -132,33 +128,33 @@ void main(void) {
 				send1byte(0xfe);
 				TMR0roundUpper = 0;
 			}
-#endif
 		}else{
-			switch( pop() ){
-				case 0x00:
-					send1byte(CCON0);
-					send1byte(CCON1);
-					send1byte(CCON2);
-					break;
-				case 0x01:
-					send1byte(CCOFF0);
-					send1byte(CCOFF1);
-					send1byte(CCOFF2);
-					break;
-				case 0x2:
-					send1byte(NOTEON0);
-					send1byte(NOTEON1);
-					send1byte(NOTEON2);
-					break;
-				case 0x3:
-					send1byte(NOTEOFF0);
-					send1byte(NOTEOFF1);
-					send1byte(NOTEOFF2);
-					break;
+			while( tail != head){
+				switch( pop() ){
+					case 0x00:
+						send1byte(CCON0);
+						send1byte(CCON1);
+						send1byte(CCON2);
+						break;
+					case 0x01:
+						send1byte(CCOFF0);
+						send1byte(CCOFF1);
+						send1byte(CCOFF2);
+						break;
+					case 0x2:
+						send1byte(NOTEON0);
+						send1byte(NOTEON1);
+						send1byte(NOTEON2);
+						break;
+					case 0x3:
+						send1byte(NOTEOFF0);
+						send1byte(NOTEOFF1);
+						send1byte(NOTEOFF2);
+						break;
+				}
 			}
 			TMR0roundUpper = 0;
 			TMR0roundLower = 0;
-			
 		}
 		CLRWDT();
 	}

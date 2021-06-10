@@ -4,7 +4,7 @@
 #include "main.h"
 #include "gpioHandle.h"
 
-#if 1
+#if 0
 void send1byte(uint8_t msgByte){
 	uint8_t itr;
 	uint8_t tmpReg; // for precise calculation of GPIO output timing.
@@ -36,8 +36,7 @@ void send1byte(uint8_t msgByte){
 	
 	// start bit
 	GPIObits.GP2 = 0;
-	__delay_us(29);
-	NOP(); // required for precise timing.
+	__delay_us(29.5);
 	
 	for( itr = 0; itr < 8; itr++){
 		//GPIObits.GP2 = (uint8_t)(msgByte & 0x1);
@@ -46,9 +45,8 @@ void send1byte(uint8_t msgByte){
 		msgByte >>= 1;
 
 		constructHistory();
-		__delay_us(9);
+		__delay_us(6);
 	}
-	GPIObits.GP2=1;
 	__delay_us(2); // required for precise timing.
 	
 	
@@ -64,7 +62,9 @@ void send1byte(uint8_t msgByte){
 	// wait for 31us elapse by TMR0
 	// This elapsing time depends on GPIO status processing operation in REMOVECHATTERINGANDFIXCURRENTPEDALSTATUS.
 	// So elastic waiting duration approach is mandatory.
-	while(TMR0 < 5){} // approx 32us is consumed from TMR0=0 statement.
+	//while(TMR0 < 2){} // approx 32us is consumed from TMR0=0 statement.
+			// removed the waiting operation, because following instruction and coming MIDI send timing,
+			// time enouh for 31us is always consumed.
 	TMR0 = TMR0store;
 }
 
