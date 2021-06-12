@@ -9,11 +9,6 @@ This means pedal was released.
 
 // These operation are both in gpioHandle and main, but cannot functionalize it because of stack depth limitation.
 #define REMOVECHATTERINGANDFIXCURRENTPEDALSTATUS \
-	STATUSbits.CARRY = 0; \
-	TMR0roundLower += TMR0; \
-	TMR0 = 0; \
-	if( STATUSbits.CARRY ) TMR0roundUpper++; \
-	\
 	if( GP1bitHistory == 0xff && lastGp1 == 0x0){ \
 		push(NOTEOFFSTAT); \
 		lastGp1 = 1; \

@@ -27,24 +27,21 @@ uint8_t pop(void)
 	uint8_t tmpReg; // temporary value for operation reduction.
 	switch( head ){
 		case 0:
-			retVal = (uint8_t)(ringBuf & 0b00000011);
+			retVal = (uint8_t)(ringBufLower & 0b00000111);
 			break;
 		case 1:
-			//retVal = (uint8_t)((ringBuf & 0b00001100) >> 2); // this style wates program count.
-			tmpReg = (uint8_t)(ringBuf & 0b00001100);
-			tmpReg >>= 2;
+			//retVal = (uint8_t)((ringBuf & 0b00111000) >> 3); // this style wates program count.
+			tmpReg = (uint8_t)(ringBufLower & 0b00111000);
+			tmpReg >>= 3;
 			retVal = tmpReg;
 			break;
 		case 2:
-			//retVal = (uint8_t)((ringBuf & 0b00110000) >> 4);
-			tmpReg = (uint8_t)(ringBuf & 0b00110000);
-			tmpReg >>= 4;
+			tmpReg = (uint8_t)(ringBufUpper & 0b00000111);
 			retVal = tmpReg;
 			break;
 		case 3:
-			//retVal = (uint8_t)((ringBuf & 0b11000000) >> 6);
-			tmpReg = (uint8_t)(ringBuf & 0b11000000);
-			tmpReg >>= 6;
+			tmpReg = (uint8_t)(ringBufUpper & 0b00111000);
+			tmpReg >>= 3;
 			retVal = tmpReg;
 			break;
 	}
@@ -59,20 +56,20 @@ void push(uint8_t pushVal)
 {
 	switch( tail ){
 		case 0:
-			ringBuf &= 0xfc;
-			ringBuf |= (uint8_t)pushVal;
+			ringBufLower &= 0xf8;
+			ringBufLower |= (uint8_t)pushVal;
 			break;
 		case 1:
-			ringBuf &= 0xf3;
-			ringBuf |= (uint8_t)(pushVal <<2);
+			ringBufLower &= 0xc7;
+			ringBufLower |= (uint8_t)(pushVal <<3);
 			break;
 		case 2:
-			ringBuf &= 0xcf;
-			ringBuf |= (uint8_t)(pushVal <<4);
+			ringBufUpper &= 0xf8;
+			ringBufUpper |= (uint8_t)pushVal;
 			break;
 		case 3:
-			ringBuf &= 0x3f;
-			ringBuf |= (uint8_t)(pushVal <<6);
+			ringBufUpper &= 0xc7;
+			ringBufUpper |= (uint8_t)(pushVal <<3);
 			break;			
 	}
 	
@@ -87,13 +84,15 @@ void main(void) {
 	/* initial chip configuration */
 	GPIObits.GP2 = 1; // for preventing unintended MIDI message output.
 	OPTION = 0b10000010; // PSA=010 for TMR0, then TMR0 counts every 4us.
-	TRISGPIO = 0b00000011;
-	ADCON0 = 0b00000000;
+	TRISGPIO = 0b00001011; // <3> is actually don't be cared, because it is always input by hardware limitation.
+	ADCON0 = 0b01000001; // ANS<0> (GPIO0's pin) is used as analog input.
 
-	/* reduce program space
+	
 	send1byte(CCOFF0);
 	send1byte(CCOFF1);
 	send1byte(CCOFF2);
+	
+	/* reduce program space 
 	send1byte(NOTEOFF0);
 	send1byte(NOTEOFF1);
 	send1byte(NOTEOFF2);
@@ -111,19 +110,18 @@ void main(void) {
 	GP1bitHistory = 0xff;
 	GP3bitHistory = 0xff;
 	TMR0 = 0;
+	ans0lastVal=0;
 	
 	/* main loop */
 	while(1){
 				
 		if( tail == head ){
 			collectGpioStat();
-			
+			TMRcarry();
+
 			REMOVECHATTERINGANDFIXCURRENTPEDALSTATUS
-	
-			STATUSbits.CARRY = 0;
-			TMR0roundLower += TMR0;
-			TMR0 = 0;
-			if( STATUSbits.CARRY ) TMR0roundUpper++;
+			TMRcarry();
+			
 			if( TMR0roundUpper > 252){ // 1-TMR0-round = 1.024ms. 1.024ms*252 ~258ms is fair for active sensing.
 				send1byte(0xfe);
 				TMR0roundUpper = 0;
@@ -131,25 +129,30 @@ void main(void) {
 		}else{
 			while( tail != head){
 				switch( pop() ){
-					case 0x00:
+					case 0b000:
 						send1byte(CCON0);
 						send1byte(CCON1);
 						send1byte(CCON2);
 						break;
-					case 0x01:
+					case 0b001:
 						send1byte(CCOFF0);
 						send1byte(CCOFF1);
 						send1byte(CCOFF2);
 						break;
-					case 0x2:
+					case 0b010:
 						send1byte(NOTEON0);
 						send1byte(NOTEON1);
 						send1byte(NOTEON2);
 						break;
-					case 0x3:
+					case 0b011:
 						send1byte(NOTEOFF0);
 						send1byte(NOTEOFF1);
 						send1byte(NOTEOFF2);
+						break;
+					case 0b100:
+						send1byte(CONTCC0);
+						send1byte(CONTCC1);
+						send1byte(ans0lastVal);
 						break;
 				}
 			}
@@ -158,4 +161,11 @@ void main(void) {
 		}
 		CLRWDT();
 	}
+}
+
+void TMRcarry(void){
+				STATUSbits.CARRY = 0;
+			TMR0roundLower += TMR0;
+			TMR0 = 0;
+			if( STATUSbits.CARRY )TMR0roundUpper++;
 }
