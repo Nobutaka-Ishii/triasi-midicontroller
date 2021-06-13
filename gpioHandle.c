@@ -77,9 +77,9 @@ void collectGpioStat(void)
 
 	tmpReg = ADRES;
 	tmpReg >>=1;
-	if(ans0lastVal != tmpReg){
-		push(tmpReg);
-		ans0lastVal = tmpReg;
+	if(an0lastVal != tmpReg){
+		push(AN0STAT);
+		an0lastVal = tmpReg;
 	}
 }
  

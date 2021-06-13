@@ -88,18 +88,18 @@ void main(void) {
 	ADCON0 = 0b01000001; // ANS<0> (GPIO0's pin) is used as analog input.
 
 	
-	send1byte(CCOFF0);
-	send1byte(CCOFF1);
-	send1byte(CCOFF2);
+	send1byte(GP1OFF0);
+	send1byte(GP1OFF1);
+	send1byte(GP1OFF2);
 	
 	/* reduce program space 
-	send1byte(NOTEOFF0);
-	send1byte(NOTEOFF1);
-	send1byte(NOTEOFF2);
+	send1byte(GP3OFF0);
+	send1byte(GP3OFF1);
+	send1byte(GP3OFF2);
 	*/
 	
-	// send all-sound-off to NOTE-control pedal channel
-	send1byte(0xB0|NOTECHANNEL);
+	// send all-sound-off to the channel where coming CC messages will be.
+	send1byte(0xB0|CCCHANNEL);
 	send1byte(ALLSOUNDOFFVALUE);
 	send1byte(0x0);
 
@@ -110,7 +110,7 @@ void main(void) {
 	GP1bitHistory = 0xff;
 	GP3bitHistory = 0xff;
 	TMR0 = 0;
-	ans0lastVal=0;
+	an0lastVal=0;
 	
 	/* main loop */
 	while(1){
@@ -130,29 +130,29 @@ void main(void) {
 			while( tail != head){
 				switch( pop() ){
 					case 0b000:
-						send1byte(CCON0);
-						send1byte(CCON1);
-						send1byte(CCON2);
+						send1byte(CCCHANNEL);
+						send1byte(GP1ON1);
+						send1byte(GP1ON2);
 						break;
 					case 0b001:
-						send1byte(CCOFF0);
-						send1byte(CCOFF1);
-						send1byte(CCOFF2);
+						send1byte(CCCHANNEL);
+						send1byte(GP1OFF1);
+						send1byte(GP1OFF2);
 						break;
 					case 0b010:
-						send1byte(NOTEON0);
-						send1byte(NOTEON1);
-						send1byte(NOTEON2);
+						send1byte(CCCHANNEL);
+						send1byte(GP3ON1);
+						send1byte(GP3ON2);
 						break;
 					case 0b011:
-						send1byte(NOTEOFF0);
-						send1byte(NOTEOFF1);
-						send1byte(NOTEOFF2);
+						send1byte(CCCHANNEL);
+						send1byte(GP3OFF1);
+						send1byte(GP3OFF2);
 						break;
 					case 0b100:
-						send1byte(CONTCC0);
-						send1byte(CONTCC1);
-						send1byte(ans0lastVal);
+						send1byte(CCCHANNEL);
+						send1byte(AN0CCNUM);
+						send1byte(an0lastVal);
 						break;
 				}
 			}

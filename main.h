@@ -3,38 +3,38 @@
 
 // User configuration fields.
 #define CCCHANNEL 0x0
-#define CCNUMBER 0x40
-#define CCONVAL 127
-#define CCOFFVAL 0
+#define GP1CCNUMBER 0x40
+#define GP3CCNUMBER 67
+#define GP1ONVAL 127
+#define GP1OFFVAL 0
+#define GP3ONVAL 127
+#define GP3OFFVAL 0
 
-#define NOTECHANNEL 1
-#define NOTENUM 48
-#define NOTEVEL 100
 // user configuration fields above.
 
-#define CCONSTAT 0b000
-#define CCON0 (uint8_t)(0xB0|CCCHANNEL)
-#define CCON1 (uint8_t)CCNUMBER
-#define CCON2 (uint8_t)CCONVAL
+#define GP1ONSTAT 0b000
+#define GP1ON0 (uint8_t)(0xB0|CCCHANNEL)
+#define GP1ON1 (uint8_t)GP1CCNUMBER
+#define GP1ON2 (uint8_t)GP1ONVAL
 
-#define CCOFFSTAT 0b001
-#define CCOFF0 (uint8_t)(0xB0|CCCHANNEL)
-#define CCOFF1 (uint8_t)CCNUMBER
-#define CCOFF2 (uint8_t)CCOFFVAL
+#define GP1OFFSTAT 0b001
+#define GP1OFF0 (uint8_t)(0xB0|CCCHANNEL)
+#define GP1OFF1 (uint8_t)GP1CCNUMBER
+#define GP1OFF2 (uint8_t)GP1OFFVAL
 
-#define NOTEONSTAT 0b010
-#define NOTEON0 (uint8_t)(0x90|NOTECHANNEL)
-#define NOTEON1 (uint8_t)NOTENUM
-#define NOTEON2 (uint8_t)NOTEVEL
+#define GP3ONSTAT 0b010
+#define GP3ON0 (uint8_t)(0xB0|CCCHANNEL)
+#define GP3ON1 (uint8_t)GP3CCNUMBER
+#define GP3ON2 (uint8_t)GP3ONVAL
 
-#define NOTEOFFSTAT 0b011
-#define NOTEOFF0 (uint8_t)(0x80|NOTECHANNEL)
-#define NOTEOFF1 (uint8_t)NOTENUM
-#define NOTEOFF2 (uint8_t)0
+#define GP3OFFSTAT 0b011
+#define GP3OFF0 (uint8_t)(0xB0|CCCHANNEL)
+#define GP3OFF1 (uint8_t)GP3CCNUMBER
+#define GP3OFF2 (uint8_t)GP3OFFVAL
 
-#define ANSTAT 0b100
-#define CONTCC0 (uint8_t)CCCHANNEL
-#define CONTCC1 (uint8_t)1
+#define AN0STAT 0b100
+#define AN0CCNUM (uint8_t)11
+// analog input AN) is used as CC#11 - expression
 
 #define ALLSOUNDOFFVALUE 120
 
@@ -70,4 +70,4 @@ uint8_t head;
 uint8_t tail;
 uint8_t lastGp1;
 uint8_t lastGp3;
-uint8_t ans0lastVal;
+uint8_t an0lastVal;
