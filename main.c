@@ -12,7 +12,6 @@
 
 #include <xc.h>
 
-
 #include <stdint.h>
 #include <stdbool.h>
 #include "main.h"
@@ -24,58 +23,81 @@ uint8_t pop(void);
 uint8_t pop(void)
 {
 	uint8_t retVal;
-	uint8_t tmpReg; // temporary value for operation reduction.
-	switch( head ){
-		case 0:
-			retVal = (uint8_t)(ringBufLower & 0b00000111);
-			break;
-		case 1:
-			//retVal = (uint8_t)((ringBuf & 0b00111000) >> 3); // this style wates program count.
-			tmpReg = (uint8_t)(ringBufLower & 0b00111000);
-			tmpReg >>= 3;
-			retVal = tmpReg;
-			break;
-		case 2:
-			tmpReg = (uint8_t)(ringBufUpper & 0b00000111);
-			retVal = tmpReg;
-			break;
-		case 3:
-			tmpReg = (uint8_t)(ringBufUpper & 0b00111000);
-			tmpReg >>= 3;
-			retVal = tmpReg;
-			break;
+	uint8_t tmpReg;
+	
+	if( head%2 ){
+		switch(head){
+			case 1:
+				tmpReg = (uint8_t)(ringBufLower & 0xf0);
+				break;
+			case 3:
+				tmpReg = (uint8_t)(ringBufMiddle & 0xf0);
+				break;
+			case 5:
+				tmpReg = (uint8_t)(ringBufUpper & 0xf0);
+				break;
+		}
+		tmpReg >>=4;
+	}else{
+		switch(head){
+			case 0:
+				retVal = (uint8_t)(ringBufLower & 0x0f);
+				break;
+			case 2:
+				retVal = (uint8_t)(ringBufMiddle & 0x0f);
+				break;
+			case 4:
+				retVal = (uint8_t)(ringBufUpper & 0x0f);
+				break;
+		}
 	}
 	
 	// moving head cursor.
 	head++;
-	head %= 4;
+	//head %= 6;
+	if( head >5) head -= 6;
 	return retVal;
 }
 
 void push(uint8_t pushVal)
 {
-	switch( tail ){
-		case 0:
-			ringBufLower &= 0xf8;
-			ringBufLower |= (uint8_t)pushVal;
-			break;
-		case 1:
-			ringBufLower &= 0xc7;
-			ringBufLower |= (uint8_t)(pushVal <<3);
-			break;
-		case 2:
-			ringBufUpper &= 0xf8;
-			ringBufUpper |= (uint8_t)pushVal;
-			break;
-		case 3:
-			ringBufUpper &= 0xc7;
-			ringBufUpper |= (uint8_t)(pushVal <<3);
-			break;			
+	if( tail%2 ){
+		switch(tail){
+			case 1:
+				ringBufLower &= 0xf0;
+				ringBufLower |= (uint8_t)pushVal;
+				break;
+			case 3:
+				ringBufMiddle &= 0xf0;
+				ringBufMiddle|= (uint8_t)pushVal;
+				break;
+			case 5:
+				ringBufUpper &= 0xf0;
+				ringBufUpper |= (uint8_t)pushVal;
+				break;
+		}
+	}else{
+		pushVal <<=4;
+		switch(tail){
+			case 0:
+				ringBufLower &= 0xf0;
+				ringBufLower |= pushVal;
+				break;
+			case 2:
+				ringBufMiddle &= 0xf0;
+				ringBufMiddle |= pushVal;
+				break;
+			case 4:
+				ringBufUpper &= 0xf0;
+				ringBufUpper |= pushVal;
+				break;
+		}
 	}
 	
 	// moving tail cursor
 	tail++;
-	tail %= 4;
+	//tail %= 6;
+	if(tail>5) tail -=6;
 }
 			
 void main(void) {
@@ -87,17 +109,6 @@ void main(void) {
 	TRISGPIO = 0b00001011; // <3> is actually don't be cared, because it is always input by hardware limitation.
 	ADCON0 = 0b01000001; // ANS<0> (GPIO0's pin) is used as analog input.
 
-	
-	send1byte(GP1OFF0);
-	send1byte(GP1OFF1);
-	send1byte(GP1OFF2);
-	
-	/* reduce program space 
-	send1byte(GP3OFF0);
-	send1byte(GP3OFF1);
-	send1byte(GP3OFF2);
-	*/
-	
 	// send all-sound-off to the channel where coming CC messages will be.
 	send1byte(0xB0|CCCHANNEL);
 	send1byte(ALLSOUNDOFFVALUE);
@@ -129,27 +140,27 @@ void main(void) {
 		}else{
 			while( tail != head){
 				switch( pop() ){
-					case 0b000:
+					case 0b0000:
 						send1byte(CCCHANNEL);
 						send1byte(GP1ON1);
 						send1byte(GP1ON2);
 						break;
-					case 0b001:
+					case 0b0001:
 						send1byte(CCCHANNEL);
 						send1byte(GP1OFF1);
 						send1byte(GP1OFF2);
 						break;
-					case 0b010:
+					case 0b0010:
 						send1byte(CCCHANNEL);
 						send1byte(GP3ON1);
 						send1byte(GP3ON2);
 						break;
-					case 0b011:
+					case 0b0011:
 						send1byte(CCCHANNEL);
 						send1byte(GP3OFF1);
 						send1byte(GP3OFF2);
 						break;
-					case 0b100:
+					case 0b0100:
 						send1byte(CCCHANNEL);
 						send1byte(AN0CCNUM);
 						send1byte(an0lastVal);
@@ -164,8 +175,8 @@ void main(void) {
 }
 
 void TMRcarry(void){
-				STATUSbits.CARRY = 0;
-			TMR0roundLower += TMR0;
-			TMR0 = 0;
-			if( STATUSbits.CARRY )TMR0roundUpper++;
+	STATUSbits.CARRY = 0;
+	TMR0roundLower += TMR0;
+	TMR0 = 0;
+	if( STATUSbits.CARRY )TMR0roundUpper++;
 }

@@ -9,32 +9,32 @@
 #define GP1OFFVAL 0
 #define GP3ONVAL 127
 #define GP3OFFVAL 0
+	// analog input AN) is used as CC#11 - expression
+#define AN0CCNUM (uint8_t)11
 
 // user configuration fields above.
 
-#define GP1ONSTAT 0b000
+#define GP1ONSTAT 0b0000
 #define GP1ON0 (uint8_t)(0xB0|CCCHANNEL)
 #define GP1ON1 (uint8_t)GP1CCNUMBER
 #define GP1ON2 (uint8_t)GP1ONVAL
 
-#define GP1OFFSTAT 0b001
+#define GP1OFFSTAT 0b0001
 #define GP1OFF0 (uint8_t)(0xB0|CCCHANNEL)
 #define GP1OFF1 (uint8_t)GP1CCNUMBER
 #define GP1OFF2 (uint8_t)GP1OFFVAL
 
-#define GP3ONSTAT 0b010
+#define GP3ONSTAT 0b0010
 #define GP3ON0 (uint8_t)(0xB0|CCCHANNEL)
 #define GP3ON1 (uint8_t)GP3CCNUMBER
 #define GP3ON2 (uint8_t)GP3ONVAL
 
-#define GP3OFFSTAT 0b011
+#define GP3OFFSTAT 0b0011
 #define GP3OFF0 (uint8_t)(0xB0|CCCHANNEL)
 #define GP3OFF1 (uint8_t)GP3CCNUMBER
 #define GP3OFF2 (uint8_t)GP3OFFVAL
 
-#define AN0STAT 0b100
-#define AN0CCNUM (uint8_t)11
-// analog input AN) is used as CC#11 - expression
+#define AN0STAT 0b0100
 
 #define ALLSOUNDOFFVALUE 120
 
@@ -44,23 +44,17 @@ uint8_t GP3bitHistory;
 uint8_t TMR0roundUpper;
 uint8_t TMR0roundLower;
 uint8_t ringBufUpper;
+uint8_t ringBufMiddle;
 uint8_t ringBufLower;
 /*
- *  000: CC#64-OFF, 001: CC#64-ON, 
- *  010: NOTE-OFF, 011: NOTE-ON
- *  100: analog value is to be sent.
+ * Ringbuffer message length is enough in 3bits, but 4bits are suitable for reducing program space.
  * 
- * It means this buffer has depth of 4.
+ *  0000: GP1 pedal released(pulled up by internal resistor), 0001: GP1 stomped, 
+ *  0010: GP3 released, 0011: GP3 stomped.
+ *  0100: analog value is to be sent because it has been changed from last sending.
+ * 
+ * It means ring buffer totally accomodate 6 messages.
 */
-
-/*
- * uint8_t cursor 
- * <5>: last GP3 stat
- * <4>: last GP1 stat
- * <3:2>: ring buffer's tail position
- * <1:0>: ring buffer's head position
- */
-//uint8_t cursor = 0b00110000; //
 
 void push(uint8_t pushVal);
 uint8_t pop(void);
