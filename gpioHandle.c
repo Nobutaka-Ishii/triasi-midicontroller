@@ -30,8 +30,8 @@ void send1byte(uint8_t msgByte){
 	GPIObits.GP2 = 1;
 	
 	// Room for 31.5us operations for end of sending stop bit.
-	TMR0store = TMR0;
-	TMR0 = 0;
+	//TMR0store = TMR0;
+	//TMR0 = 0;
 
 	REMOVECHATTERINGANDFIXCURRENTPEDALSTATUS
 
@@ -41,7 +41,7 @@ void send1byte(uint8_t msgByte){
 	//while(TMR0 < 2){} // approx 32us is consumed from TMR0=0 statement.
 			// removed the waiting operation, because following instruction and coming MIDI send timing,
 			// time enouh for 31us is always consumed.
-	TMR0 = TMR0store;
+	TMRcarry();
 }
 
 void send1byte(uint8_t msgByte);
@@ -65,21 +65,23 @@ void constructHistory(void)
 
 void collectGpioStat(void)
 {
-	uint8_t itr;
-	uint8_t tmpReg;
+	uint8_t tmpReg0; // iterator and calculation use.
+	uint8_t tmpReg1;
 	
 	ADCON0 = 0b01000011; // "ADCON0 |= 0b00000010" is equivalent but wastes program space.
-	
-	for( itr = 0; itr < 8; itr++){
+	for( tmpReg0 = 0 ; tmpReg0 < 8; tmpReg0++){
 		constructHistory();
 		__delay_us(20);
 	}
 
-	tmpReg = ADRES;
-	tmpReg >>=1;
-	if(an0lastVal != tmpReg){
+	tmpReg0 = ADRES;
+	tmpReg0 >>= 1; // get current value as 7bit width.
+	tmpReg1 = (uint8_t)(tmpReg0 + an0lastVal); // both operands are 7bits-widthed. So uint8_t cast is valid.
+	tmpReg1 >>= 1; // Now tmpReg1 is the average of current and last AN0's 7bits-converted value.
+	
+	if(an0lastVal != tmpReg1 ){
 		push(AN0STAT);
-		an0lastVal = tmpReg;
+		an0lastVal = tmpReg1;
 	}
 }
  
