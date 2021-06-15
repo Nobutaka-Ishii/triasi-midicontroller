@@ -66,23 +66,21 @@ void constructHistory(void)
 void collectGpioStat(void)
 {
 	uint8_t tmpReg0; // iterator and calculation use.
-	uint8_t tmpReg1;
 	
 	ADCON0 = 0b01000011; // "ADCON0 |= 0b00000010" is equivalent but wastes program space.
 	for( tmpReg0 = 0 ; tmpReg0 < 8; tmpReg0++){
 		constructHistory();
 		__delay_us(20);
-	}
+	} // in the 2nd loop, AD conversion gets always finished.
 
+	// so no check of ADC process status bit.
 	tmpReg0 = ADRES;
-	tmpReg0 >>= 1; // get current value as 7bit width.
-	tmpReg1 = (uint8_t)(tmpReg0 + an0lastVal); // both operands are 7bits-widthed. So uint8_t cast is valid.
-	tmpReg1 >>= 1; // Now tmpReg1 is the average of current and last AN0's 7bits-converted value.
+	tmpReg0 >>= 1;
 	
-	if(an0lastVal != tmpReg1 ){
-		push(AN0STAT);
-		an0lastVal = tmpReg1;
-	}
+	if(	( an0lastVal != tmpReg0) && an0inUse ){
+			push(AN0STAT);
+			an0lastVal = tmpReg0;
+	}	
 }
  
 

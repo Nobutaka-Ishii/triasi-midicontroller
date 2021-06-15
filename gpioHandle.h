@@ -11,7 +11,7 @@ This means pedal was released.
 #define REMOVECHATTERINGANDFIXCURRENTPEDALSTATUS \
 	if( GP1bitHistory == 0xff && lastGp1 == 0x0){ \
 		push(GP3OFFSTAT); \
-		lastGp1 = 1; \
+		lastGp1 |= 1; \
 	} \
 	if( GP1bitHistory == 0x00 && lastGp1 == 0x1){ \
 		push(GP3ONSTAT); \
@@ -19,7 +19,7 @@ This means pedal was released.
 	} \
 	if( GP3bitHistory == 0xff && lastGp3 == 0x0){ \
 		push(GP1OFFSTAT); \
-		lastGp3 = 1; \
+		lastGp3 |= 1; \
 	} \
 	if( GP3bitHistory == 0x00 && lastGp3 == 0x1){ \
 		push(GP1ONSTAT); \
