@@ -108,6 +108,9 @@ void main(void) {
 	OPTION = 0b11000010; // PSA=010 for TMR0, then TMR0 counts every 4us.
 	TRISGPIO = 0b00001011; // <3> is actually don't be cared, because it is always input by hardware limitation.
 	ADCON0 = 0b01000001; // ANS<0> (GPIO0's pin) is used as analog input.
+	
+	if(GPIObits.GP1 == 0) an0inUse |= 1;
+	else an0inUse = 0;
 
 	// send all-sound-off to the channel where coming CC messages will be.
 	send1byte(0xB0|CCCHANNEL);
@@ -116,8 +119,8 @@ void main(void) {
 
 	head = 0;
 	tail = 0;
-	lastGp1 = 1;
-	lastGp3 = 1;
+	lastGp1 |= 1; // "lastGp1=1;" is equivalent but waste of operations.
+	lastGp3 |= 1;
 	GP1bitHistory = 0xff;
 	GP3bitHistory = 0xff;
 	TMR0 = 0;

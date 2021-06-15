@@ -61,6 +61,7 @@ void TMRcarry(); // Carry operation between TMR0roundCountUpper and lower are do
 
 uint8_t head;
 uint8_t tail;
-uint8_t lastGp1;
-uint8_t lastGp3;
+bool lastGp1;
+bool lastGp3;
 uint8_t an0lastVal;
+bool an0inUse;
