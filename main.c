@@ -23,21 +23,17 @@ uint8_t pop(void);
 uint8_t pop(void)
 {
 	uint8_t retVal;
-	uint8_t tmpReg;
 	
 	if( head%2 ){
 		switch(head){
 			case 1:
-				tmpReg = (uint8_t)(ringBufLower & 0xf0);
+				retVal = (uint8_t)(ringBufLower & 0xf0);
 				break;
 			case 3:
-				tmpReg = (uint8_t)(ringBufMiddle & 0xf0);
-				break;
-			case 5:
-				tmpReg = (uint8_t)(ringBufUpper & 0xf0);
+				retVal = (uint8_t)(ringBufMiddle & 0xf0);
 				break;
 		}
-		tmpReg >>=4;
+		retVal >>=4;
 	}else{
 		switch(head){
 			case 0:
@@ -46,38 +42,31 @@ uint8_t pop(void)
 			case 2:
 				retVal = (uint8_t)(ringBufMiddle & 0x0f);
 				break;
-			case 4:
-				retVal = (uint8_t)(ringBufUpper & 0x0f);
-				break;
 		}
 	}
 	
 	// moving head cursor.
 	head++;
-	//head %= 6;
-	if( head >5) head -= 6;
+	head %= 4;
+	//if( head >4) head -= 4;
 	return retVal;
 }
 
 void push(uint8_t pushVal)
 {
 	if( tail%2 ){
+		pushVal <<=4;
 		switch(tail){
 			case 1:
-				ringBufLower &= 0xf0;
+				ringBufLower &= 0x0f;
 				ringBufLower |= (uint8_t)pushVal;
 				break;
 			case 3:
-				ringBufMiddle &= 0xf0;
+				ringBufMiddle &= 0x0f;
 				ringBufMiddle|= (uint8_t)pushVal;
-				break;
-			case 5:
-				ringBufUpper &= 0xf0;
-				ringBufUpper |= (uint8_t)pushVal;
 				break;
 		}
 	}else{
-		pushVal <<=4;
 		switch(tail){
 			case 0:
 				ringBufLower &= 0xf0;
@@ -87,17 +76,13 @@ void push(uint8_t pushVal)
 				ringBufMiddle &= 0xf0;
 				ringBufMiddle |= pushVal;
 				break;
-			case 4:
-				ringBufUpper &= 0xf0;
-				ringBufUpper |= pushVal;
-				break;
 		}
 	}
 	
 	// moving tail cursor
 	tail++;
-	//tail %= 6;
-	if(tail>5) tail -=6;
+	tail %= 4;
+	//if(tail>4) tail -=4;
 }
 			
 void main(void) {
@@ -121,10 +106,10 @@ void main(void) {
 	tail = 0;
 	lastGp1 |= 1; // "lastGp1=1;" is equivalent but waste of operations.
 	lastGp3 |= 1;
-	GP1bitHistory = 0xff;
-	GP3bitHistory = 0xff;
+	//GP1bitHistory = 0xff;
+	//GP3bitHistory = 0xff;
 	TMR0 = 0;
-	an0lastVal = 0;
+	//an0lastVal = 0;
 	
 	/* main loop */
 	while(1){
@@ -143,27 +128,27 @@ void main(void) {
 		}else{
 			while( tail != head){
 				switch( pop() ){
-					case 0b0000:
+					case 0x00:
 						send1byte(CCCHANNEL);
 						send1byte(GP1ON1);
 						send1byte(GP1ON2);
 						break;
-					case 0b0001:
+					case 0x01:
 						send1byte(CCCHANNEL);
 						send1byte(GP1OFF1);
 						send1byte(GP1OFF2);
 						break;
-					case 0b0010:
+					case 0x02:
 						send1byte(CCCHANNEL);
 						send1byte(GP3ON1);
 						send1byte(GP3ON2);
 						break;
-					case 0b0011:
+					case 0x03:
 						send1byte(CCCHANNEL);
 						send1byte(GP3OFF1);
 						send1byte(GP3OFF2);
 						break;
-					case 0b0100:
+					case 0x04:
 						send1byte(CCCHANNEL);
 						send1byte(AN0CCNUM);
 						send1byte(an0lastVal);

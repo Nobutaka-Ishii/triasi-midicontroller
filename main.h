@@ -14,27 +14,27 @@
 
 // user configuration fields above.
 
-#define GP1ONSTAT 0b0000
+#define GP1ONSTAT 0x0
 #define GP1ON0 (uint8_t)(0xB0|CCCHANNEL)
 #define GP1ON1 (uint8_t)GP1CCNUMBER
 #define GP1ON2 (uint8_t)GP1ONVAL
 
-#define GP1OFFSTAT 0b0001
+#define GP1OFFSTAT 0x1
 #define GP1OFF0 (uint8_t)(0xB0|CCCHANNEL)
 #define GP1OFF1 (uint8_t)GP1CCNUMBER
 #define GP1OFF2 (uint8_t)GP1OFFVAL
 
-#define GP3ONSTAT 0b0010
+#define GP3ONSTAT 0x2
 #define GP3ON0 (uint8_t)(0xB0|CCCHANNEL)
 #define GP3ON1 (uint8_t)GP3CCNUMBER
 #define GP3ON2 (uint8_t)GP3ONVAL
 
-#define GP3OFFSTAT 0b0011
+#define GP3OFFSTAT 0x3
 #define GP3OFF0 (uint8_t)(0xB0|CCCHANNEL)
 #define GP3OFF1 (uint8_t)GP3CCNUMBER
 #define GP3OFF2 (uint8_t)GP3OFFVAL
 
-#define AN0STAT 0b0100
+#define AN0STAT 0x4
 
 #define ALLSOUNDOFFVALUE 120
 
@@ -42,7 +42,7 @@ uint8_t GP1bitHistory;
 uint8_t GP3bitHistory;
 uint8_t TMR0roundUpper;
 uint8_t TMR0roundLower;
-uint8_t ringBufUpper;
+//uint8_t ringBufUpper;
 uint8_t ringBufMiddle;
 uint8_t ringBufLower;
 /*

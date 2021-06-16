@@ -10,19 +10,19 @@ This means pedal was released.
 // These operation are both in gpioHandle and main, but cannot functionalize it because of stack depth limitation.
 #define REMOVECHATTERINGANDFIXCURRENTPEDALSTATUS \
 	if( GP1bitHistory == 0xff && lastGp1 == 0x0){ \
-		push(GP3OFFSTAT); \
+		push(GP1OFFSTAT); \
 		lastGp1 |= 1; \
 	} \
 	if( GP1bitHistory == 0x00 && lastGp1 == 0x1){ \
-		push(GP3ONSTAT); \
+		push(GP1ONSTAT); \
 		lastGp1 = 0; \
 	} \
 	if( GP3bitHistory == 0xff && lastGp3 == 0x0){ \
-		push(GP1OFFSTAT); \
+		push(GP3OFFSTAT); \
 		lastGp3 |= 1; \
 	} \
 	if( GP3bitHistory == 0x00 && lastGp3 == 0x1){ \
-		push(GP1ONSTAT); \
+		push(GP3ONSTAT); \
 		lastGp3 = 0; \
 	} // set of operations end here.
 

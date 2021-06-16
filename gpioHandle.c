@@ -25,7 +25,6 @@ void send1byte(uint8_t msgByte){
 	}
 	__delay_us(2); // required for precise timing.
 	
-	
 	// stop bit
 	GPIObits.GP2 = 1;
 	
