@@ -9,7 +9,9 @@
 #define GP1OFFVAL 0
 #define GP3ONVAL 127
 #define GP3OFFVAL 0
-	// analog input AN) is used as CC#11 - expression
+
+#define AN0CHANNEL (uint8_t)(0xB0|CCCHANNEL)
+	// analog input AN0 is used as CC#11 - expression
 #define AN0CCNUM (uint8_t)11
 
 // user configuration fields above.

@@ -71,9 +71,12 @@ void collectGpioStat(void)
 		constructHistory();
 		__delay_us(20);
 	} // in the 2nd loop, AD conversion gets always finished.
-
 	// so no check of ADC process status bit.
+	
 	tmpReg0 = ADRES;
+	tmpReg0 >>= 1;
+	// averaging for supressing pedal's value drift.
+	tmpReg0 += an0lastVal; // both operatnds have the value under 128. So this never overflows.
 	tmpReg0 >>= 1;
 	
 	if(	( an0lastVal != tmpReg0) && an0inUse ){

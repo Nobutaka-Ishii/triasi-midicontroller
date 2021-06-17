@@ -151,7 +151,7 @@ void main(void) {
 						send1byte(GP3OFF2);
 						break;
 					case 0x04:
-						send1byte(CCCHANNEL);
+						send1byte(AN0CHANNEL);
 						send1byte(AN0CCNUM);
 						send1byte(an0lastVal);
 						break;
