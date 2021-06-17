@@ -86,16 +86,18 @@ void push(uint8_t pushVal)
 }
 			
 void main(void) {
+	//asm("MOVLW 0b00111110");
+	asm("MOVLW 0b00111110");
 	asm("MOVWF OSCCAL");
 
 	/* initial chip configuration */
 	GPIObits.GP2 = 1; // for preventing unintended MIDI message output.
-	OPTION = 0b11000010; // PSA=010 for TMR0, then TMR0 counts every 4us.
+	OPTION = 0b10000010; // PSA=010 for TMR0, then TMR0 counts every 4us.
 	TRISGPIO = 0b00001011; // <3> is actually don't be cared, because it is always input by hardware limitation.
 	ADCON0 = 0b01000001; // ANS<0> (GPIO0's pin) is used as analog input.
 	
-	if(GPIObits.GP1 == 0) an0inUse |= 1;
-	else an0inUse = 0;
+	if(GPIObits.GP1 == 0) an0inUse = 0;
+	else an0inUse |=1 ;
 
 	// send all-sound-off to the channel where coming CC messages will be.
 	send1byte(0xB0|CCCHANNEL);
@@ -129,22 +131,22 @@ void main(void) {
 			while( tail != head){
 				switch( pop() ){
 					case 0x00:
-						send1byte(CCCHANNEL);
+						send1byte(GP1ON0);
 						send1byte(GP1ON1);
 						send1byte(GP1ON2);
 						break;
 					case 0x01:
-						send1byte(CCCHANNEL);
+						send1byte(GP1OFF0);
 						send1byte(GP1OFF1);
 						send1byte(GP1OFF2);
 						break;
 					case 0x02:
-						send1byte(CCCHANNEL);
+						send1byte(GP3ON0);
 						send1byte(GP3ON1);
 						send1byte(GP3ON2);
 						break;
 					case 0x03:
-						send1byte(CCCHANNEL);
+						send1byte(GP3OFF0);
 						send1byte(GP3OFF1);
 						send1byte(GP3OFF2);
 						break;
