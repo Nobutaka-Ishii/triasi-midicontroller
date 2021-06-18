@@ -3,7 +3,7 @@
 // CONFIG
 #pragma config IOSCFS = 8MHZ    // Internal Oscillator Frequency Select bit (8 MHz)
 #pragma config MCPU = OFF       // Master Clear Pull-up Enable bit (Pull-up disabled)
-#pragma config WDTE = ON       // Watchdog Timer Enable bit (WDT enabled)
+#pragma config WDTE = ON        // Watchdog Timer Enable bit (WDT enabled)
 #pragma config CP = OFF         // Code protection bit (Code protection off)
 #pragma config MCLRE = OFF      // GP3/MCLR Pin Function Select bit (GP3/MCLR pin function is digital I/O, MCLR internally tied to VDD)
 
@@ -30,7 +30,7 @@ uint8_t pop(void)
 				retVal = (uint8_t)(ringBufLower & 0xf0);
 				break;
 			case 3:
-				retVal = (uint8_t)(ringBufMiddle & 0xf0);
+				retVal = (uint8_t)(ringBufUpper & 0xf0);
 				break;
 		}
 		retVal >>=4;
@@ -40,7 +40,7 @@ uint8_t pop(void)
 				retVal = (uint8_t)(ringBufLower & 0x0f);
 				break;
 			case 2:
-				retVal = (uint8_t)(ringBufMiddle & 0x0f);
+				retVal = (uint8_t)(ringBufUpper & 0x0f);
 				break;
 		}
 	}
@@ -48,7 +48,6 @@ uint8_t pop(void)
 	// moving head cursor.
 	head++;
 	head %= 4;
-	//if( head >4) head -= 4;
 	return retVal;
 }
 
@@ -62,8 +61,8 @@ void push(uint8_t pushVal)
 				ringBufLower |= (uint8_t)pushVal;
 				break;
 			case 3:
-				ringBufMiddle &= 0x0f;
-				ringBufMiddle|= (uint8_t)pushVal;
+				ringBufUpper &= 0x0f;
+				ringBufUpper |= (uint8_t)pushVal;
 				break;
 		}
 	}else{
@@ -73,8 +72,8 @@ void push(uint8_t pushVal)
 				ringBufLower |= pushVal;
 				break;
 			case 2:
-				ringBufMiddle &= 0xf0;
-				ringBufMiddle |= pushVal;
+				ringBufUpper &= 0xf0;
+				ringBufUpper |= pushVal;
 				break;
 		}
 	}
@@ -82,11 +81,9 @@ void push(uint8_t pushVal)
 	// moving tail cursor
 	tail++;
 	tail %= 4;
-	//if(tail>4) tail -=4;
 }
 			
 void main(void) {
-	//asm("MOVLW 0b00111110");
 	asm("MOVLW 0b00111110");
 	asm("MOVWF OSCCAL");
 
@@ -96,7 +93,7 @@ void main(void) {
 	TRISGPIO = 0b00001011; // <3> is actually don't be cared, because it is always input by hardware limitation.
 	ADCON0 = 0b01000001; // ANS<0> (GPIO0's pin) is used as analog input.
 	
-	if(GPIObits.GP1 == 0) an0inUse = 0;
+	if(GPIObits.GP3 == 0) an0inUse = 0;
 	else an0inUse |=1 ;
 
 	// send all-sound-off to the channel where coming CC messages will be.
@@ -106,12 +103,21 @@ void main(void) {
 
 	head = 0;
 	tail = 0;
-	lastGp1 |= 1; // "lastGp1=1;" is equivalent but waste of operations.
-	lastGp3 |= 1;
-	//GP1bitHistory = 0xff;
-	//GP3bitHistory = 0xff;
-	TMR0 = 0;
-	//an0lastVal = 0;
+	/*
+	lastGp1 = 1; // "lastGp1=1;" is equivalent but waste of operations.
+	lastGp3 = 1;
+	GP1bitHistory = 0xff;
+	GP3bitHistory = 0xff;
+	 */
+	lastGp1 = 0;
+	lastGp3 = 0;
+	// Declaring as this, GP1bitHistory, GP3bitHistory are not cleared by 0xff.
+	// Because even if being in the worst case that booting sequence had 0->1 transition,
+	// they only sent NOTE-OFF. They will sound nothing.
+	
+	
+	TMR0 = 0; // not affect much
+	an0lastVal = 0;
 	
 	/* main loop */
 	while(1){

@@ -3,8 +3,8 @@
 
 // User configuration fields.
 #define CCCHANNEL 0x0
-#define GP1CCNUMBER 0x40
-#define GP3CCNUMBER 67
+#define GP1CCNUMBER 67
+#define GP3CCNUMBER 0x40
 #define GP1ONVAL 127
 #define GP1OFFVAL 0
 #define GP3ONVAL 127
@@ -13,6 +13,13 @@
 #define AN0CHANNEL (uint8_t)(0xB0|CCCHANNEL)
 	// analog input AN0 is used as CC#11 - expression
 #define AN0CCNUM (uint8_t)11
+
+#define GP1NOTEON0 (uint8_t)0x81
+#define GP1NOTEON1 (uint8_t)48
+#define GP1NOTEON2 (uint8_t)100
+#define GP1NOTEOFF0 (uint8_t)0x91
+#define GP1NOTEOFF1 (uint8_t)48
+#define GP1NOTEOFF2 (uint8_t)0
 
 // user configuration fields above.
 
@@ -44,8 +51,7 @@ uint8_t GP1bitHistory;
 uint8_t GP3bitHistory;
 uint8_t TMR0roundUpper;
 uint8_t TMR0roundLower;
-//uint8_t ringBufUpper;
-uint8_t ringBufMiddle;
+uint8_t ringBufUpper;
 uint8_t ringBufLower;
 /*
  * Ringbuffer message length is enough in 3bits, but 4bits are suitable for reducing program space.

@@ -26,7 +26,7 @@ void send1byte(uint8_t msgByte){
 	__delay_us(2); // required for precise timing.
 	
 	// stop bit
-	GPIObits.GP2 = 1;
+	GPIObits.GP2 |= 1;
 	
 	// Room for 31.5us operations for end of sending stop bit.
 	//TMR0store = TMR0;
@@ -58,7 +58,6 @@ void constructHistory(void)
 	GP1bitHistory |= (uint8_t)(gpStatStore & 0x01);
 	gpStatStore >>= 2; // make GP3 info to place lsb bit.
 	GP3bitHistory |= (uint8_t)(gpStatStore & 0x01);
-
 }
 
 
@@ -71,10 +70,11 @@ void collectGpioStat(void)
 		constructHistory();
 		__delay_us(20);
 	} // in the 2nd loop, AD conversion gets always finished.
-	// so no check of ADC process status bit.
 	
+	// so no check of ADC process status bit.
 	tmpReg0 = ADRES;
 	tmpReg0 >>= 1;
+	
 	// averaging for supressing pedal's value drift.
 	tmpReg0 += an0lastVal; // both operatnds have the value under 128. So this never overflows.
 	tmpReg0 >>= 1;
