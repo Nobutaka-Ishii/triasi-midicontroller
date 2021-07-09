@@ -90,7 +90,7 @@ void main(void) {
 	/* initial chip configuration */
 	GPIObits.GP2 = 1; // for preventing unintended MIDI message output.
 	OPTION = 0b10000010; // PSA=010 for TMR0, then TMR0 counts every 4us.
-	TRISGPIO = 0b00001011; // <3> is actually don't be cared, because it is always input by hardware limitation.
+	TRISGPIO = 0b00001011; // <7:4> are not implemented. <3> is actually not cared, because it always work as input port by hardware constraint.
 	ADCON0 = 0b01000001; // ANS<0> (GPIO0's pin) is used as analog input.
 	
 //	if(GPIObits.GP3 == 0) an0inUse = 0;
