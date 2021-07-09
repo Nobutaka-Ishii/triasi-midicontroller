@@ -3,7 +3,7 @@
 // CONFIG
 #pragma config IOSCFS = 8MHZ    // Internal Oscillator Frequency Select bit (8 MHz)
 #pragma config MCPU = OFF       // Master Clear Pull-up Enable bit (Pull-up disabled)
-#pragma config WDTE = ON        // Watchdog Timer Enable bit (WDT enabled)
+#pragma config WDTE = OFF        // Watchdog Timer Enable bit (WDT disabled)
 #pragma config CP = OFF         // Code protection bit (Code protection off)
 #pragma config MCLRE = OFF      // GP3/MCLR Pin Function Select bit (GP3/MCLR pin function is digital I/O, MCLR internally tied to VDD)
 
@@ -95,11 +95,14 @@ void main(void) {
 	
 	if(GPIObits.GP3 == 0) an0inUse = 0;
 	else an0inUse |=1 ;
-
+	
+	if(GPIObits.GP1 == 0) gp1isNote = 1;
+	else gp1isNote = 0;
+	
 	// send all-sound-off to the channel where coming CC messages will be.
-	send1byte(0xB0|CCCHANNEL);
-	send1byte(ALLSOUNDOFFVALUE);
-	send1byte(0x0);
+	//send1byte(0xB0|CCCHANNEL);
+	//send1byte(ALLSOUNDOFFVALUE);
+	//send1byte(0x0);
 
 	head = 0;
 	tail = 0;
@@ -116,8 +119,8 @@ void main(void) {
 	// they only sent NOTE-OFF. They will sound nothing.
 	
 	
-	TMR0 = 0; // not affect much
-	an0lastVal = 0;
+	//TMR0 = 0; // not affect much
+	//an0lastVal = 0;
 	
 	/* main loop */
 	while(1){
@@ -137,14 +140,26 @@ void main(void) {
 			while( tail != head){
 				switch( pop() ){
 					case 0x00:
-						send1byte(GP1ON0);
-						send1byte(GP1ON1);
-						send1byte(GP1ON2);
+						if(gp1isNote){
+							send1byte(GP1NOTEON0);
+							send1byte(GP1NOTEON1);
+							send1byte(GP1NOTEON2);
+						}else{
+							send1byte(GP1ON0);
+							send1byte(GP1ON1);
+							send1byte(GP1ON2);
+						}
 						break;
 					case 0x01:
-						send1byte(GP1OFF0);
-						send1byte(GP1OFF1);
-						send1byte(GP1OFF2);
+						if(gp1isNote){
+							send1byte(GP1NOTEOFF0);
+							send1byte(GP1NOTEOFF1);
+							send1byte(GP1NOTEOFF2);
+						}else{
+							send1byte(GP1OFF0);
+							send1byte(GP1OFF1);
+							send1byte(GP1OFF2);
+						}
 						break;
 					case 0x02:
 						send1byte(GP3ON0);
@@ -164,9 +179,9 @@ void main(void) {
 				}
 			}
 			TMR0roundUpper = 0;
-			TMR0roundLower = 0;
+			//TMR0roundLower = 0;
 		}
-		CLRWDT();
+		//CLRWDT();
 	}
 }
 

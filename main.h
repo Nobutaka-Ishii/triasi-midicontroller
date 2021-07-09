@@ -14,10 +14,10 @@
 	// analog input AN0 is used as CC#11 - expression
 #define AN0CCNUM (uint8_t)11
 
-#define GP1NOTEON0 (uint8_t)0x81
+#define GP1NOTEON0 (uint8_t)0x91
 #define GP1NOTEON1 (uint8_t)48
 #define GP1NOTEON2 (uint8_t)100
-#define GP1NOTEOFF0 (uint8_t)0x91
+#define GP1NOTEOFF0 (uint8_t)0x81
 #define GP1NOTEOFF1 (uint8_t)48
 #define GP1NOTEOFF2 (uint8_t)0
 
@@ -73,3 +73,4 @@ bool lastGp1;
 bool lastGp3;
 uint8_t an0lastVal;
 bool an0inUse;
+bool gp1isNote;
