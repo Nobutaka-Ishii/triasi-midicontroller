@@ -75,14 +75,11 @@ void collectGpioStat(void)
 	tmpReg0 = ADRES;
 	tmpReg0 >>= 1;
 	
-	// averaging for supressing pedal's value drift.
-	tmpReg0 += an0lastVal; // both operatnds have the value under 128. So this never overflows.
-	tmpReg0 >>= 1;
-	
-	if(	( an0lastVal != tmpReg0) && an0inUse ){
+	if ( (an0lastVal == tmpReg0) && (an0lastVal != an0lastSentVal) ){
 			push(AN0STAT);
-			an0lastVal = tmpReg0;
-	}	
+			an0lastSentVal = tmpReg0;
+	}
+	an0lastVal = tmpReg0;
 }
  
 

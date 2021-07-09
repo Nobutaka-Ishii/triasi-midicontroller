@@ -3,7 +3,7 @@
 // CONFIG
 #pragma config IOSCFS = 8MHZ    // Internal Oscillator Frequency Select bit (8 MHz)
 #pragma config MCPU = OFF       // Master Clear Pull-up Enable bit (Pull-up disabled)
-#pragma config WDTE = OFF        // Watchdog Timer Enable bit (WDT disabled)
+#pragma config WDTE = ON        // Watchdog Timer Enable bit (WDT enabled)
 #pragma config CP = OFF         // Code protection bit (Code protection off)
 #pragma config MCLRE = OFF      // GP3/MCLR Pin Function Select bit (GP3/MCLR pin function is digital I/O, MCLR internally tied to VDD)
 
@@ -93,8 +93,8 @@ void main(void) {
 	TRISGPIO = 0b00001011; // <3> is actually don't be cared, because it is always input by hardware limitation.
 	ADCON0 = 0b01000001; // ANS<0> (GPIO0's pin) is used as analog input.
 	
-	if(GPIObits.GP3 == 0) an0inUse = 0;
-	else an0inUse |=1 ;
+//	if(GPIObits.GP3 == 0) an0inUse = 0;
+//	else an0inUse |=1 ;
 	
 	if(GPIObits.GP1 == 0) gp1isNote = 1;
 	else gp1isNote = 0;
@@ -106,12 +106,13 @@ void main(void) {
 
 	head = 0;
 	tail = 0;
+	
+	lastGp1 |= 1; // "lastGp1=1;" is equivalent but waste of operations.
+	lastGp3 |= 1;
 	/*
-	lastGp1 = 1; // "lastGp1=1;" is equivalent but waste of operations.
-	lastGp3 = 1;
 	GP1bitHistory = 0xff;
 	GP3bitHistory = 0xff;
-	 */
+	*/
 	lastGp1 = 0;
 	lastGp3 = 0;
 	// Declaring as this, GP1bitHistory, GP3bitHistory are not cleared by 0xff.
@@ -179,9 +180,9 @@ void main(void) {
 				}
 			}
 			TMR0roundUpper = 0;
-			//TMR0roundLower = 0;
+			TMR0roundLower = 0;
 		}
-		//CLRWDT();
+		CLRWDT();
 	}
 }
 

@@ -72,5 +72,6 @@ uint8_t tail;
 bool lastGp1;
 bool lastGp3;
 uint8_t an0lastVal;
-bool an0inUse;
+uint8_t an0lastSentVal;
+//bool an0inUse;
 bool gp1isNote;
