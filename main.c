@@ -93,11 +93,8 @@ void main(void) {
 	TRISGPIO = 0b00001011; // <7:4> are not implemented. <3> is actually not cared, because it always work as input port by hardware constraint.
 	ADCON0 = 0b01000001; // ANS<0> (GPIO0's pin) is used as analog input.
 	
-//	if(GPIObits.GP3 == 0) an0inUse = 0;
-//	else an0inUse |=1 ;
-	
-	if(GPIObits.GP1 == 0) gp1isNote = 1;
-	else gp1isNote = 0;
+	if(GPIObits.GP3 == 0) an0oldVal[1] = 0xff;
+	else an0oldVal[1] = 0;
 	
 	// send all-sound-off to the channel where coming CC messages will be.
 	//send1byte(0xB0|CCCHANNEL);
@@ -107,12 +104,13 @@ void main(void) {
 	head = 0;
 	tail = 0;
 	
-	lastGp1 |= 1; // "lastGp1=1;" is equivalent but waste of operations.
-	lastGp3 |= 1;
 	/*
+	lastGp1 |= 1;
+	lastGp3 |= 1;
 	GP1bitHistory = 0xff;
 	GP3bitHistory = 0xff;
 	*/
+	
 	lastGp1 = 0;
 	lastGp3 = 0;
 	// Declaring as this, GP1bitHistory, GP3bitHistory are not cleared by 0xff.
@@ -120,8 +118,7 @@ void main(void) {
 	// they only sent NOTE-OFF. They will sound nothing.
 	
 	
-	//TMR0 = 0; // not affect much
-	//an0lastVal = 0;
+	TMR0 = 0;
 	
 	/* main loop */
 	while(1){
@@ -141,26 +138,14 @@ void main(void) {
 			while( tail != head){
 				switch( pop() ){
 					case 0x00:
-						if(gp1isNote){
-							send1byte(GP1NOTEON0);
-							send1byte(GP1NOTEON1);
-							send1byte(GP1NOTEON2);
-						}else{
-							send1byte(GP1ON0);
-							send1byte(GP1ON1);
-							send1byte(GP1ON2);
-						}
+						send1byte(GP1ON0);
+						send1byte(GP1ON1);
+						send1byte(GP1ON2);
 						break;
 					case 0x01:
-						if(gp1isNote){
-							send1byte(GP1NOTEOFF0);
-							send1byte(GP1NOTEOFF1);
-							send1byte(GP1NOTEOFF2);
-						}else{
-							send1byte(GP1OFF0);
-							send1byte(GP1OFF1);
-							send1byte(GP1OFF2);
-						}
+						send1byte(GP1OFF0);
+						send1byte(GP1OFF1);
+						send1byte(GP1OFF2);
 						break;
 					case 0x02:
 						send1byte(GP3ON0);
@@ -175,7 +160,7 @@ void main(void) {
 					case 0x04:
 						send1byte(AN0CHANNEL);
 						send1byte(AN0CCNUM);
-						send1byte(an0lastVal);
+						send1byte(an0lastSentVal);
 						break;
 				}
 			}

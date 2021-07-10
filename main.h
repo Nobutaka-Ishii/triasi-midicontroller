@@ -14,13 +14,6 @@
 	// analog input AN0 is used as CC#11 - expression
 #define AN0CCNUM (uint8_t)11
 
-#define GP1NOTEON0 (uint8_t)0x91
-#define GP1NOTEON1 (uint8_t)48
-#define GP1NOTEON2 (uint8_t)100
-#define GP1NOTEOFF0 (uint8_t)0x81
-#define GP1NOTEOFF1 (uint8_t)48
-#define GP1NOTEOFF2 (uint8_t)0
-
 // user configuration fields above.
 
 #define GP1ONSTAT 0x0
@@ -71,7 +64,7 @@ uint8_t head;
 uint8_t tail;
 bool lastGp1;
 bool lastGp3;
-uint8_t an0lastVal;
+uint8_t an0oldVal[3]; // [0] is new, while [2] is the oldest. [1]'s MSB bit is used as an0 use/unuse flag. 1 means used.
 uint8_t an0lastSentVal;
 //bool an0inUse;
-bool gp1isNote;
+

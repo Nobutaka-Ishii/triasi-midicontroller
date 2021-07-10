@@ -75,11 +75,25 @@ void collectGpioStat(void)
 	tmpReg0 = ADRES;
 	tmpReg0 >>= 1;
 	
-	if ( (an0lastVal == tmpReg0) && (an0lastVal != an0lastSentVal) ){
-			push(AN0STAT);
-			an0lastSentVal = tmpReg0;
+	// in the operations below, [2] and [0] are used for calculation.
+	an0oldVal[2] += (uint8_t)(0x7f & an0oldVal[1]);
+	an0oldVal[2] >>= 1; // Now [2] has the average value of [2] and [1]
+	an0oldVal[1] &= 0x80;
+	an0oldVal[1] |= an0oldVal[0]; // Not substitution but OR operation, because [1]'s MSB is used as an0 use/unuse flag.
+	an0oldVal[0] += tmpReg0;
+	an0oldVal[0] >>= 1; // Now [0] has the average value of [0] and current ADC value.
+	an0oldVal[2] += an0oldVal[0];
+	an0oldVal[2] >>= 1; // Now [2] has the average of last 4 AD conversion value.
+	
+	if ( (an0oldVal[2] != an0lastSentVal) && ( (an0oldVal[1] & 0x80) == 0x80 ) ){
+		an0lastSentVal = an0oldVal[2]; // to be sent later when an0 operation is popped from the buffer.
+		push(AN0STAT);
 	}
-	an0lastVal = tmpReg0;
+	
+	// renew the ADC values history array.
+	an0oldVal[2] = (0x7f & an0oldVal[1]);
+	// an0oldVal[1] is already renewed by the value of [0].
+	an0oldVal[0] = tmpReg0;
 }
  
 
